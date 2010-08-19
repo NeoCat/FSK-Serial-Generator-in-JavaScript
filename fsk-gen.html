@@ -94,6 +94,18 @@ function generate(str) {
 </head>
 
 <body>
+
+<h1>FSK Serial Generator in JavaScript</h1>
+
+<p><strong>*** THIS SOFTWARE IS NOT TESTED AT ALL CURRENTLY AND MAY NOT WORK ***</strong></p>
+
+<p>Send data to the SoftModem breakout board for Arduino using JavaScript.</p>
+<p>This works in data-uri and HTML5 ready browsers (Firefox, Safari, Chrome, Opera).</p>
+
+<p>About SoftModem: 
+<a href="http://code.google.com/p/arms22/wiki/SoftModemBreakoutBoard">http://code.google.com/p/arms22/wiki/SoftModemBreakoutBoard</a></p>
+
+
 <form onsubmit="generate($('data').value); return false;">
 Text: <input type="text" id="data" size="40" value="こんにちは">
 <input type="submit" value="Send"></p>
