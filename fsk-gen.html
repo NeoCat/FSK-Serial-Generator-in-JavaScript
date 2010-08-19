@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>FSKSerialGenerator in JavaScript</title>
+<script type="text/javascript">
+function $(name) {
+	return document.getElementById(name);
+}
+function chr16() {
+	return Array.prototype.map.call(arguments, function(a){
+		return String.fromCharCode(a&0xff, (a>>8)&0xff)
+	}).join('');
+}
+function chr32() {
+	return Array.prototype.map.call(arguments, function(a){
+		return String.fromCharCode(a&0xff, (a>>8)&0xff,(a>>16)&0xff, (a>>24)&0xff);
+	}).join('');
+}
+function toUTF8(str) {
+	var utf8 = [];
+	for (var i = 0; i < str.length; i++) {
+		var c = str.charCodeAt(i);
+		if (c <= 0x7f)
+			utf8.push(c);
+		else if (c <= 0x7ff) {
+			utf8.push(0xc0 | (c >>> 6));
+			utf8.push(0x80 | (c & 0x3f));
+		} else if (c <= 0xffff) {
+			utf8.push(0xe0 | (c >>> 12));
+			utf8.push(0x80 | ((c >>> 6) & 0x3f));
+			utf8.push(0x80 | (c & 0x3f));
+		} else {
+			var j = 4;
+			while (c >>> (6*j)) j++;
+			utf8.push(((0xff00 >>> j) & 0xff) | (c >>> (6*--j)));
+			while (j--) 
+				utf8[idx++] = 0x80 | ((c >>> (6*j)) & 0x3f);
+		}
+	}
+	return utf8;
+}
+
+
+var audio;
+function generate(str) {
+	if (str.length == 0) return;
+	var utf8 = toUTF8(str);
+	//console.log(utf8);
+	
+	var sampleRate = 29400;
+	var phase = 0;
+	var baud = 1225;
+	var freqHigh = 7350;
+	var freqLow  = 4900;
+	var spb = sampleRate/baud; // 24 samples per bit
+	var preCarrierBits = Math.ceil(sampleRate*40/1000/spb); // 49 bits
+	var postCarrierBits = Math.ceil(sampleRate*5/1000/spb); // 6.125 bits => 7 bits
+	
+	var data = "RIFF----WAVEfmt " + chr32(16, 0x00010001, sampleRate, sampleRate*2, 0x00100002) +
+				"data----";
+	var headerSize = data.length;
+	
+	function pushData(freq, samples) {
+		for (var i = 0; i < samples; i++) {
+			phase = (phase + sampleRate/freq) % sampleRate;
+			var v = 32767 * Math.sin((2 * Math.PI) * (i / sampleRate) * freq);
+			data += chr16(v);
+		}
+	}
+	pushData(freqHigh, preCarrierBits*spb);
+	for (var x in utf8) {
+		x = (x << 1) | 0x200;
+		for (var i = 0; i < 10; i++, x >>>= 1)
+			pushData((i&1) ? freqHigh : freqLow, spb);
+	}
+	pushData(freqHigh, postCarrierBits*spb);
+	
+	var size = chr32(data.length, headerSize);
+	for (var i = 0; i < 4; i++) data[i+4] = size[i];
+	for (var i = 0; i < 4; i++) data[i+headerSize-4] = size[i+4];
+	
+	var dataURI = "data:audio/wav;base64," + escape(btoa(data));
+	
+	if (audio) {
+		audio.parentNode.removeChild(audio);
+	}
+	audio = document.createElement("audio");
+	audio.setAttribute("src", dataURI);
+	audio.setAttribute("autoplay", 'autoplay');
+	document.getElementById('ply').appendChild(audio);
+}
+</script>
+</head>
+
+<body>
+<form onsubmit="generate($('data').value); return false;">
+Text: <input type="text" id="data" size="40" value="こんにちは">
+<input type="submit" value="Send"></p>
+</form>
+
+<div id="ply"></div>
+</body>
+
+</html>
