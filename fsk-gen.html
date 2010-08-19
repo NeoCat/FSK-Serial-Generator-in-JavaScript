@@ -49,21 +49,20 @@ function generate(str) {
 	//console.log(utf8);
 	
 	var sampleRate = 29400;
-	var phase = 0;
 	var baud = 1225;
 	var freqHigh = 7350;
 	var freqLow  = 4900;
 	var spb = sampleRate/baud; // 24 samples per bit
 	var preCarrierBits = Math.ceil(sampleRate*40/1000/spb); // 49 bits
 	var postCarrierBits = Math.ceil(sampleRate*5/1000/spb); // 6.125 bits => 7 bits
-	
-	var data = "RIFF----WAVEfmt " + chr32(16, 0x00010001, sampleRate, sampleRate*2, 0x00100002) +
-				"data----";
-	var headerSize = data.length;
+	var size = (preCarrierBits + postCarrierBits + 10*utf8.length) * spb * 2;
+
+	var data = "RIFF" + chr32(size+44) + "WAVE" +
+			"fmt " + chr32(16, 0x00010001, sampleRate, sampleRate*2, 0x00100002) +
+			"data" + chr32(size);
 	
 	function pushData(freq, samples) {
 		for (var i = 0; i < samples; i++) {
-			phase = (phase + sampleRate/freq) % sampleRate;
 			var v = 32767 * Math.sin((2 * Math.PI) * (i / sampleRate) * freq);
 			data += chr16(v);
 		}
@@ -76,9 +75,7 @@ function generate(str) {
 	}
 	pushData(freqHigh, postCarrierBits*spb);
 	
-	var size = chr32(data.length, headerSize);
-	for (var i = 0; i < 4; i++) data[i+4] = size[i];
-	for (var i = 0; i < 4; i++) data[i+headerSize-4] = size[i+4];
+	if (size+44 != data.length) alert("wrong size: " + size+44 + " != " + data.length);
 	
 	var dataURI = "data:audio/wav;base64," + escape(btoa(data));
 	
@@ -108,7 +105,7 @@ function generate(str) {
 
 <form onsubmit="generate($('data').value); return false;">
 Text: <input type="text" id="data" size="40" value="こんにちは">
-<input type="submit" value="Send"></p>
+<input type="submit" value="Send">
 </form>
 
 <div id="ply"></div>
