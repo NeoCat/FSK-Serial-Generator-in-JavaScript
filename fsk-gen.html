@@ -69,9 +69,9 @@ function generate(str) {
 	}
 	pushData(freqHigh, preCarrierBits*spb);
 	for (var x in utf8) {
-		x = (x << 1) | 0x200;
-		for (var i = 0; i < 10; i++, x >>>= 1)
-			pushData((i&1) ? freqHigh : freqLow, spb);
+		var c = (utf8[x] << 1) | 0x200;
+		for (var i = 0; i < 10; i++, c >>>= 1)
+			pushData((c&1) ? freqHigh : freqLow, spb);
 	}
 	pushData(freqHigh, postCarrierBits*spb);
 	
