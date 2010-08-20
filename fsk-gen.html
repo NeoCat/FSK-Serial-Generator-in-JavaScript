@@ -85,7 +85,8 @@ function generate(str) {
 	audio = document.createElement("audio");
 	audio.setAttribute("src", dataURI);
 	audio.setAttribute("autoplay", 'autoplay');
-	document.getElementById('ply').appendChild(audio);
+	$('ply').appendChild(audio);
+	$('jmp').disabled = false;
 }
 </script>
 </head>
@@ -106,6 +107,7 @@ function generate(str) {
 <form onsubmit="generate($('data').value); return false;">
 Text: <input type="text" id="data" size="40" value="こんにちは">
 <input type="submit" value="Send">
+<input type="button" value="Jump" id="jmp" disabled="true" onclick="location.href=audio.src">
 </form>
 
 <div id="ply"></div>
