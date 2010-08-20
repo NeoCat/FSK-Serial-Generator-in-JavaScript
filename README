@@ -3,7 +3,7 @@ FSK Serial Generator in JavaScript
 *** THIS SOFTWARE IS NOT TESTED AT ALL CURRENTLY AND MAY NOT WORK ***
 
 Send data to the SoftModem breakout board for Arduino using JavaScript.
-This works in data-uri and HTML5 ready browsers (Firefox, Safari, Chrome, Opera).
+This works in data-uri and HTML5 ready browsers (Firefox, Safari, Opera).
 
 - About SoftModem
   http://code.google.com/p/arms22/wiki/SoftModemBreakoutBoard
