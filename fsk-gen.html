@@ -7,6 +7,11 @@
 function $(name) {
 	return document.getElementById(name);
 }
+function chr8() {
+	return Array.prototype.map.call(arguments, function(a){
+		return String.fromCharCode(a&0xff)
+	}).join('');
+}
 function chr16() {
 	return Array.prototype.map.call(arguments, function(a){
 		return String.fromCharCode(a&0xff, (a>>8)&0xff)
@@ -55,16 +60,16 @@ function generate(str) {
 	var spb = sampleRate/baud; // 24 samples per bit
 	var preCarrierBits = Math.ceil(sampleRate*40/1000/spb); // 49 bits
 	var postCarrierBits = Math.ceil(sampleRate*5/1000/spb); // 6.125 bits => 7 bits
-	var size = (preCarrierBits + postCarrierBits + 10*utf8.length) * spb * 2;
+	var size = (preCarrierBits + postCarrierBits + 10*utf8.length) * spb;
 
-	var data = "RIFF" + chr32(size+44) + "WAVE" +
-			"fmt " + chr32(16, 0x00010001, sampleRate, sampleRate*2, 0x00100002) +
+	var data = "RIFF" + chr32(size+36) + "WAVE" +
+			"fmt " + chr32(16, 0x00010001, sampleRate, sampleRate, 0x00080001) +
 			"data" + chr32(size);
 	
 	function pushData(freq, samples) {
 		for (var i = 0; i < samples; i++) {
-			var v = 32767 * Math.sin((2 * Math.PI) * (i / sampleRate) * freq);
-			data += chr16(v);
+			var v = 128 + 127 * Math.sin((2 * Math.PI) * (i / sampleRate) * freq);
+			data += chr8(v);
 		}
 	}
 	pushData(freqHigh, preCarrierBits*spb);
