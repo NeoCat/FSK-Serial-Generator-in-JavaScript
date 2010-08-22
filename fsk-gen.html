@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>FSKSerialGenerator in JavaScript</title>
+<title>FSK Serial Generator in JavaScript for SoftModem board</title>
 <script type="text/javascript">
 function $(name) {
 	return document.getElementById(name);
@@ -42,7 +42,7 @@ function toUTF8(str) {
 }
 
 
-var audio;
+var dataURI, audio;
 function generate(str) {
 	if (str.length == 0) return;
 	var utf8 = toUTF8(str);
@@ -77,15 +77,10 @@ function generate(str) {
 	
 	if (size+44 != data.length) alert("wrong size: " + size+44 + " != " + data.length);
 	
-	var dataURI = "data:audio/wav;base64," + escape(btoa(data));
+	dataURI = "data:audio/wav;base64," + escape(btoa(data));
+	audio = new Audio(dataURI);
+	audio.play();
 	
-	if (audio) {
-		audio.parentNode.removeChild(audio);
-	}
-	audio = document.createElement("audio");
-	audio.setAttribute("src", dataURI);
-	audio.setAttribute("autoplay", 'autoplay');
-	$('ply').appendChild(audio);
 	$('jmp').disabled = false;
 }
 </script>
@@ -93,24 +88,20 @@ function generate(str) {
 
 <body>
 
-<h1>FSK Serial Generator in JavaScript</h1>
+<h1>FSK Serial Generator in JavaScript for SoftModem board</h1>
 
-<p><strong>*** THIS SOFTWARE IS NOT TESTED AT ALL CURRENTLY AND MAY NOT WORK ***</strong></p>
+<p>You can send data to the SoftModem breakout board for Arduino using JavaScript in this page.<br>
+This works in data-uri audio and HTML5 ready browsers (Firefox, Safari, Opera).</p>
 
-<p>Send data to the SoftModem breakout board for Arduino using JavaScript.</p>
-<p>This works in data-uri and HTML5 ready browsers (Firefox, Safari, Chrome, Opera).</p>
-
-<p>About SoftModem: 
+<p><b>About SoftModem: </b>
 <a href="http://code.google.com/p/arms22/wiki/SoftModemBreakoutBoard">http://code.google.com/p/arms22/wiki/SoftModemBreakoutBoard</a></p>
 
 
 <form onsubmit="generate($('data').value); return false;">
-Text: <input type="text" id="data" size="40" value="こんにちは">
-<input type="submit" value="Send">
-<input type="button" value="Jump" id="jmp" disabled="true" onclick="location.href=audio.src">
+Text: <input type="text" id="data" size="40" value="Hello!">
+<input type="submit" value="Generate and Send">
+<input type="button" value="Jump to Audio data" id="jmp" disabled="true" onclick="location.href=dataURI">
 </form>
-
-<div id="ply"></div>
 </body>
 
 </html>
